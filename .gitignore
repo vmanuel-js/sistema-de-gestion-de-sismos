@@ -19,3 +19,4 @@ out/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+.smarttomcat/
