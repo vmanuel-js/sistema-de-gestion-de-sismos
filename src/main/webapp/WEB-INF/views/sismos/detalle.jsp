@@ -10,7 +10,7 @@
 </head>
 <body>
 <div class="barra-superior">
-    <span class="marca">CSSP <span>Sistema de Gestion de Sismos</span></span>
+    <span class="marca">CSSP <span>Sistema de Gestión de Sismos</span></span>
     <a href="${pageContext.request.contextPath}/sismos">Sismos</a>
 </div>
 <main class="contenedor">
@@ -38,7 +38,7 @@
 
     <section class="tarjeta" style="margin-top:16px;">
         <div class="detalle-grid">
-            <div><div class="etiqueta">Codigo</div><div class="valor"><c:out value="${sismo.codigo}"/></div></div>
+            <div><div class="etiqueta">Código</div><div class="valor"><c:out value="${sismo.codigo}"/></div></div>
             <div><div class="etiqueta">Fecha y hora</div><div class="valor"><c:out value="${sismo.fechaHoraTexto}"/></div></div>
             <div><div class="etiqueta">Estado</div><div class="valor"><span class="${sismo.claseEstado}"><c:out value="${sismo.estado}"/></span></div></div>
 
@@ -48,6 +48,7 @@
 
             <div><div class="etiqueta">Latitud</div><div class="valor"><c:out value="${sismo.latitud}"/></div></div>
             <div><div class="etiqueta">Longitud</div><div class="valor"><c:out value="${sismo.longitud}"/></div></div>
+            <div><div class="etiqueta">Estación</div><div class="valor"><c:out value="${empty sismo.codigoEstacion ? 'Sin estación' : sismo.codigoEstacion}"/></div></div>
 
             <div><div class="etiqueta">Departamento</div><div class="valor"><c:out value="${sismo.departamento}"/></div></div>
             <div><div class="etiqueta">Provincia</div><div class="valor"><c:out value="${sismo.provincia}"/></div></div>
