@@ -23,8 +23,8 @@
                 <a class="boton" href="${pageContext.request.contextPath}/sismos/nuevo">+ Nuevo sismo</a>
             </nav>
 
-            <c:if test="${param.eliminado eq 'true'}">
-                <div class="alerta alerta-exito">Sismo eliminado correctamente.</div>
+            <c:if test="${not empty param.eliminado}">
+                <div class="alerta alerta-exito">El sismo <c:out value="${param.eliminado}"/> se eliminó correctamente.</div>
             </c:if>
 
             <section class="tarjeta">

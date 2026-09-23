@@ -11,9 +11,9 @@ Grupo 6 · Desarrollo de Aplicaciones Empresariales Avanzado · ISIL 2026-20
 | HU-03 | Validar campos obligatorios y código único | José | ✅ |
 | HU-04 | Validar magnitud, profundidad, coordenadas y fecha | Cristian | ✅ (dentro de `SismoValidador`, revisar) |
 | HU-05 | Ver el detalle de un sismo | José | ✅ |
-| HU-06 | Editar un sismo | Nick | ⏳ Pendiente |
-| HU-07 | Eliminar un sismo con confirmación | Víctor | ⏳ Pendiente |
-| HU-08 | Gestionar el estado del evento | Cristian | ⏳ Falta el selector en Editar (va con HU-06) |
+| HU-06 | Editar un sismo | José | ✅ |
+| HU-07 | Eliminar un sismo con confirmación | José | ✅ |
+| HU-08 | Gestionar el estado del evento | Cristian | ✅ (estado automático al registrar y selector en Editar) |
 
 ## Estructura
 
@@ -38,25 +38,17 @@ src/main/webapp/WEB-INF/views/
 - **Estados:** usar las constantes de `Sismo` (`ESTADO_REGISTRADO`, `ESTADOS_VALIDOS`, etc.), nunca escribir los textos a mano.
 - **Validaciones:** usar siempre `SismoValidador`; no repetir validaciones dentro de los servlets.
 
-## Guía para HU-06 Editar (Nick)
+## Rutas del CRUD
 
-`formulario.jsp` ya sirve para Editar. Solo falta crear `SismoEditarServlet` en `/sismos/editar`:
+| Método y ruta | Servlet | Qué hace |
+|---|---|---|
+| GET `/sismos` | SismoListarServlet | Lista los sismos |
+| GET/POST `/sismos/nuevo` | SismoNuevoServlet | Formulario y registro (estado Registrado automático) |
+| GET `/sismos/detalle?id=X` | SismoDetalleServlet | Detalle o 404 |
+| GET/POST `/sismos/editar?id=X` | SismoEditarServlet | Formulario precargado, mismas validaciones y cambio de estado |
+| GET/POST `/sismos/eliminar?id=X` | SismoEliminarServlet | GET confirma, POST elimina; bloquea los sismos En seguimiento |
 
-- **GET `/sismos/editar?id=X`**: buscar el sismo (si no existe, 404 como en `SismoDetalleServlet`) y enviar a la JSP:
-  - `modo` = `"editar"` · `sismoId` = el id · `formulario` = `SismoFormulario.desdeSismo(sismo)`
-  - `errores` = `Map.of()` · `estaciones`, `intensidades` y `estados` (igual que en `SismoNuevoServlet`)
-- **POST `/sismos/editar`** (el id llega en el campo oculto `id`):
-  1. `request.setCharacterEncoding("UTF-8")` y `SismoFormulario.desdeRequest(request)`.
-  2. `validador.validar(formulario, sismoActual)`. Pasar el sismo actual hace que el código único ignore al propio sismo y que se valide el estado.
-  3. Si hay errores, volver a la JSP con `formulario` y `errores`.
-  4. Si no, `formulario.copiarEn(sismoActual)`, `repositorio.actualizar(sismoActual)` y redirigir a
-     `/sismos/detalle?id=X&actualizado=1` (el detalle ya muestra "Sismo actualizado correctamente").
-
-## Guía para HU-07 Eliminar (Víctor)
-
-- **GET `/sismos/eliminar?id=X`**: mostrar `eliminar.jsp` con el código, fecha, magnitud, referencia y estado, la advertencia y los botones Confirmar (formulario POST) y Cancelar.
-- **POST `/sismos/eliminar`**: si el estado es `Sismo.ESTADO_EN_SEGUIMIENTO`, no eliminar y volver a mostrar la confirmación con el motivo. Si no, `repositorio.eliminar(id)` y redirigir a `/sismos?eliminado=true` (la lista ya muestra el mensaje).
-- Para probar el bloqueo: `SIS-001` está En seguimiento en los datos de ejemplo.
+Todas las operaciones que modifican datos usan POST y redirigen al terminar (Post/Redirect/Get).
 
 ## Datos de ejemplo (AplicacionListener)
 
@@ -64,6 +56,7 @@ src/main/webapp/WEB-INF/views/
 - 5 departamentos con su provincia y distrito.
 - 6 estaciones; **TAC-02 está inactiva** para probar que no acepta nuevos registros.
 - 1 reporte de afectación y 1 seguimiento para SIS-001.
+- **SIS-001 está En seguimiento**: sirve para probar que no se puede eliminar.
 
 ## Cómo ejecutarlo
 
