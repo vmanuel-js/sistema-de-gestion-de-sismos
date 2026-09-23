@@ -6,13 +6,22 @@ import java.time.format.DateTimeFormatter;
 public class Sismo {
 
     public static final String ESTADO_REGISTRADO = "Registrado";
-    public static final String ESTADO_EN_EVALUACION = "En evaluacion";
+    public static final String ESTADO_EN_EVALUACION = "En evaluación";
     public static final String ESTADO_EN_SEGUIMIENTO = "En seguimiento";
     public static final String ESTADO_CERRADO = "Cerrado";
 
     public static final String[] ESTADOS_VALIDOS = {
             ESTADO_REGISTRADO, ESTADO_EN_EVALUACION, ESTADO_EN_SEGUIMIENTO, ESTADO_CERRADO
     };
+
+    /** Escala de Mercalli Modificada (MM). */
+    public static final String[] INTENSIDADES = {
+            "I (MM)", "II (MM)", "III (MM)", "IV (MM)", "V (MM)", "VI (MM)",
+            "VII (MM)", "VIII (MM)", "IX (MM)", "X (MM)", "XI (MM)", "XII (MM)"
+    };
+
+    private static final DateTimeFormatter FORMATO_TEXTO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FORMATO_INPUT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
     private Long id;
     private String codigo;
@@ -26,6 +35,8 @@ public class Sismo {
     private String distritoReferencia;
     private String intensidad;
     private String estado;
+    /** Código de la estación de monitoreo que registró el sismo (relación Estación 1 - N Sismo). */
+    private String codigoEstacion;
 
     public Sismo() {
     }
@@ -45,6 +56,15 @@ public class Sismo {
         this.distritoReferencia = distritoReferencia;
         this.intensidad = intensidad;
         this.estado = estado;
+    }
+
+    public Sismo(Long id, String codigo, LocalDateTime fechaHora, double magnitud,
+                 double profundidad, double latitud, double longitud, String departamento,
+                 String provincia, String distritoReferencia, String intensidad, String estado,
+                 String codigoEstacion) {
+        this(id, codigo, fechaHora, magnitud, profundidad, latitud, longitud, departamento,
+                provincia, distritoReferencia, intensidad, estado);
+        this.codigoEstacion = codigoEstacion;
     }
 
     public static boolean esEstadoValido(String estado) {
@@ -95,7 +115,15 @@ public class Sismo {
         if (fechaHora == null) {
             return "";
         }
-        return fechaHora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        return fechaHora.format(FORMATO_TEXTO);
+    }
+
+    /** Fecha en el formato que espera un input datetime-local (por ejemplo, 2026-08-18T14:32). */
+    public String getFechaHoraInput() {
+        if (fechaHora == null) {
+            return "";
+        }
+        return fechaHora.format(FORMATO_INPUT);
     }
 
     public void setFechaHora(LocalDateTime fechaHora) {
@@ -172,5 +200,13 @@ public class Sismo {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getCodigoEstacion() {
+        return codigoEstacion;
+    }
+
+    public void setCodigoEstacion(String codigoEstacion) {
+        this.codigoEstacion = codigoEstacion;
     }
 }

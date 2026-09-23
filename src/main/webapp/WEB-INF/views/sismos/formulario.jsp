@@ -1,100 +1,203 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%--
+  Formulario compartido para Nuevo (HU-02) y Editar (HU-06).
+  Atributos que debe enviar el servlet:
+    modo         -> "nuevo" o "editar"
+    formulario   -> SismoFormulario con los valores a mostrar
+    errores      -> Map campo -> mensaje (vacío si no hay errores)
+    estaciones, intensidades, estados -> listas para los <select>
+    sismoId      -> solo en modo "editar"
+--%>
+<c:set var="esEditar" value="${modo eq 'editar'}"/>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuevo sismo | CSSP</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css">
+    <title>${esEditar ? 'Editar sismo' : 'Nuevo sismo'} | CSSP</title>
+    <link rel="stylesheet" href="${ctx}/css/estilos.css">
 </head>
 <body>
 <div class="barra-superior">
-    <span class="marca">CSSP <span>Sistema de Gestion de Sismos</span></span>
-    <a href="${pageContext.request.contextPath}/sismos">Sismos</a>
+    <span class="marca">CSSP <span>Sistema de Gestión de Sismos</span></span>
+    <a href="${ctx}/sismos">Sismos</a>
 </div>
 <main class="contenedor">
-    <p class="breadcrumb"><a href="${pageContext.request.contextPath}/sismos">Sismos</a> / Nuevo sismo</p>
-    <h1>Nuevo sismo</h1>
-    <p class="subtitulo">Los campos marcados con * son obligatorios.</p>
+    <c:choose>
+        <c:when test="${esEditar}">
+            <p class="breadcrumb"><a href="${ctx}/sismos">Sismos</a> /
+                <a href="${ctx}/sismos/detalle?id=${sismoId}"><c:out value="${formulario.codigo}"/></a> / Editar</p>
+            <h1>Editar sismo <c:out value="${formulario.codigo}"/></h1>
+            <p class="subtitulo">Se aplican las mismas validaciones que en el registro. Los campos marcados con * son obligatorios.</p>
+        </c:when>
+        <c:otherwise>
+            <p class="breadcrumb"><a href="${ctx}/sismos">Sismos</a> / Nuevo sismo</p>
+            <h1>Nuevo sismo</h1>
+            <p class="subtitulo">Los campos marcados con * son obligatorios.</p>
+        </c:otherwise>
+    </c:choose>
 
+    <%-- Zona de mensajes de validación: resumen de todos los errores --%>
     <c:if test="${not empty errores}">
         <div class="alerta alerta-error">
-            No se pudo registrar el sismo. Revise los siguientes datos:
+            <strong>No se pudo ${esEditar ? 'guardar' : 'registrar'} el sismo. Revise los siguientes datos:</strong>
             <ul>
-                <c:forEach items="${errores}" var="err">
-                    <li><c:out value="${err}"/></li>
+                <c:forEach items="${errores}" var="error">
+                    <li><c:out value="${error.value}"/></li>
                 </c:forEach>
             </ul>
         </div>
     </c:if>
 
     <section class="tarjeta">
-        <form method="post" action="${pageContext.request.contextPath}/sismos/nuevo">
+        <form method="post" action="${ctx}/sismos/${esEditar ? 'editar' : 'nuevo'}" novalidate>
+            <c:if test="${esEditar}">
+                <input type="hidden" name="id" value="${sismoId}">
+            </c:if>
 
             <div class="seccion-titulo">Datos del evento</div>
             <div class="formulario-grid">
                 <label>
-                    <span class="campo-obligatorio">Codigo</span>
-                    <input name="codigo" value="<c:out value='${codigoIngresado}'/>">
+                    <span class="campo-obligatorio">Código</span>
+                    <input name="codigo" maxlength="20" placeholder="Ej. SIS-006"
+                           value="${fn:escapeXml(formulario.codigo)}"
+                           class="${not empty errores.codigo ? 'campo-error' : ''}">
+                    <c:if test="${not empty errores.codigo}"><span class="ayuda-error"><c:out value="${errores.codigo}"/></span></c:if>
                 </label>
                 <label>
                     <span class="campo-obligatorio">Fecha y hora</span>
-                    <input name="fechaHora" type="datetime-local" value="<c:out value='${fechaHoraIngresada}'/>">
-                    <span class="ayuda">No puede ser una fecha futura.</span>
+                    <input name="fechaHora" type="datetime-local"
+                           value="${fn:escapeXml(formulario.fechaHora)}"
+                           class="${not empty errores.fechaHora ? 'campo-error' : ''}">
+                    <c:choose>
+                        <c:when test="${not empty errores.fechaHora}"><span class="ayuda-error"><c:out value="${errores.fechaHora}"/></span></c:when>
+                        <c:otherwise><span class="ayuda">No puede ser una fecha futura.</span></c:otherwise>
+                    </c:choose>
                 </label>
                 <label>
                     <span>Intensidad</span>
-                    <input name="intensidad" value="<c:out value='${intensidadIngresada}'/>" placeholder="Ej. III (MM)">
+                    <select name="intensidad" class="${not empty errores.intensidad ? 'campo-error' : ''}">
+                        <option value="">Sin especificar</option>
+                        <c:forEach items="${intensidades}" var="i">
+                            <option value="${i}" ${i eq formulario.intensidad ? 'selected' : ''}>${i}</option>
+                        </c:forEach>
+                    </select>
+                    <c:if test="${not empty errores.intensidad}"><span class="ayuda-error"><c:out value="${errores.intensidad}"/></span></c:if>
                 </label>
 
                 <label>
                     <span class="campo-obligatorio">Magnitud</span>
-                    <input name="magnitud" type="number" step="0.1" value="<c:out value='${magnitudIngresada}'/>">
-                    <span class="ayuda">Debe ser mayor que cero.</span>
+                    <input name="magnitud" type="number" step="0.1"
+                           value="${fn:escapeXml(formulario.magnitud)}"
+                           class="${not empty errores.magnitud ? 'campo-error' : ''}">
+                    <c:choose>
+                        <c:when test="${not empty errores.magnitud}"><span class="ayuda-error"><c:out value="${errores.magnitud}"/></span></c:when>
+                        <c:otherwise><span class="ayuda">Debe ser mayor que cero.</span></c:otherwise>
+                    </c:choose>
                 </label>
                 <label>
                     <span class="campo-obligatorio">Profundidad (km)</span>
-                    <input name="profundidad" type="number" step="0.1" value="<c:out value='${profundidadIngresada}'/>">
-                    <span class="ayuda">No puede ser negativa.</span>
+                    <input name="profundidad" type="number" step="0.1"
+                           value="${fn:escapeXml(formulario.profundidad)}"
+                           class="${not empty errores.profundidad ? 'campo-error' : ''}">
+                    <c:choose>
+                        <c:when test="${not empty errores.profundidad}"><span class="ayuda-error"><c:out value="${errores.profundidad}"/></span></c:when>
+                        <c:otherwise><span class="ayuda">No puede ser negativa.</span></c:otherwise>
+                    </c:choose>
                 </label>
                 <label>
-                    <span>Estado</span>
-                    <input value="Registrado" disabled>
-                    <span class="ayuda">Se asigna automaticamente al registrar.</span>
+                    <span>Estación que lo registró</span>
+                    <select name="codigoEstacion" class="${not empty errores.codigoEstacion ? 'campo-error' : ''}">
+                        <option value="">Sin estación</option>
+                        <c:forEach items="${estaciones}" var="e">
+                            <c:set var="seleccionada" value="${e.codigo eq formulario.codigoEstacion}"/>
+                            <option value="${e.codigo}" ${seleccionada ? 'selected' : ''} ${!e.activa and !seleccionada ? 'disabled' : ''}>
+                                <c:out value="${e.codigo} · ${e.nombre}"/>${e.activa ? '' : ' (inactiva)'}
+                            </option>
+                        </c:forEach>
+                    </select>
+                    <c:choose>
+                        <c:when test="${not empty errores.codigoEstacion}"><span class="ayuda-error"><c:out value="${errores.codigoEstacion}"/></span></c:when>
+                        <c:otherwise><span class="ayuda">Las estaciones inactivas no pueden recibir nuevos registros.</span></c:otherwise>
+                    </c:choose>
                 </label>
             </div>
 
-            <div class="seccion-titulo">Ubicacion</div>
+            <div class="seccion-titulo">Ubicación</div>
             <div class="formulario-grid">
                 <label>
                     <span class="campo-obligatorio">Latitud</span>
-                    <input name="latitud" type="number" step="0.0001" value="<c:out value='${latitudIngresada}'/>">
-                    <span class="ayuda">Entre -90 y 90.</span>
+                    <input name="latitud" type="number" step="0.0001"
+                           value="${fn:escapeXml(formulario.latitud)}"
+                           class="${not empty errores.latitud ? 'campo-error' : ''}">
+                    <c:choose>
+                        <c:when test="${not empty errores.latitud}"><span class="ayuda-error"><c:out value="${errores.latitud}"/></span></c:when>
+                        <c:otherwise><span class="ayuda">Entre -90 y 90.</span></c:otherwise>
+                    </c:choose>
                 </label>
                 <label>
                     <span class="campo-obligatorio">Longitud</span>
-                    <input name="longitud" type="number" step="0.0001" value="<c:out value='${longitudIngresada}'/>">
-                    <span class="ayuda">Entre -180 y 180.</span>
+                    <input name="longitud" type="number" step="0.0001"
+                           value="${fn:escapeXml(formulario.longitud)}"
+                           class="${not empty errores.longitud ? 'campo-error' : ''}">
+                    <c:choose>
+                        <c:when test="${not empty errores.longitud}"><span class="ayuda-error"><c:out value="${errores.longitud}"/></span></c:when>
+                        <c:otherwise><span class="ayuda">Entre -180 y 180.</span></c:otherwise>
+                    </c:choose>
                 </label>
                 <label>
                     <span class="campo-obligatorio">Departamento</span>
-                    <input name="departamento" value="<c:out value='${departamentoIngresado}'/>">
+                    <input name="departamento" value="${fn:escapeXml(formulario.departamento)}"
+                           class="${not empty errores.departamento ? 'campo-error' : ''}">
+                    <c:if test="${not empty errores.departamento}"><span class="ayuda-error"><c:out value="${errores.departamento}"/></span></c:if>
                 </label>
 
                 <label>
                     <span class="campo-obligatorio">Provincia</span>
-                    <input name="provincia" value="<c:out value='${provinciaIngresada}'/>">
+                    <input name="provincia" value="${fn:escapeXml(formulario.provincia)}"
+                           class="${not empty errores.provincia ? 'campo-error' : ''}">
+                    <c:if test="${not empty errores.provincia}"><span class="ayuda-error"><c:out value="${errores.provincia}"/></span></c:if>
                 </label>
                 <label>
                     <span class="campo-obligatorio">Distrito o referencia</span>
-                    <input name="distritoReferencia" value="<c:out value='${distritoReferenciaIngresado}'/>">
+                    <input name="distritoReferencia" value="${fn:escapeXml(formulario.distritoReferencia)}"
+                           class="${not empty errores.distritoReferencia ? 'campo-error' : ''}">
+                    <c:if test="${not empty errores.distritoReferencia}"><span class="ayuda-error"><c:out value="${errores.distritoReferencia}"/></span></c:if>
                 </label>
+                <c:choose>
+                    <c:when test="${esEditar}">
+                        <label>
+                            <span class="campo-obligatorio">Estado</span>
+                            <select name="estado" class="${not empty errores.estado ? 'campo-error' : ''}">
+                                <c:forEach items="${estados}" var="est">
+                                    <option value="${est}" ${est eq formulario.estado ? 'selected' : ''}>${est}</option>
+                                </c:forEach>
+                            </select>
+                            <c:choose>
+                                <c:when test="${not empty errores.estado}"><span class="ayuda-error"><c:out value="${errores.estado}"/></span></c:when>
+                                <c:otherwise><span class="ayuda">Registrado · En evaluación · En seguimiento · Cerrado</span></c:otherwise>
+                            </c:choose>
+                        </label>
+                    </c:when>
+                    <c:otherwise>
+                        <label>
+                            <span>Estado</span>
+                            <input value="Registrado" disabled>
+                            <span class="ayuda">Se asigna automáticamente al registrar.</span>
+                        </label>
+                    </c:otherwise>
+                </c:choose>
             </div>
 
             <div class="acciones" style="margin-top: 20px;">
-                <button class="boton" type="submit">Guardar</button>
-                <a class="boton-secundario" href="${pageContext.request.contextPath}/sismos">Cancelar</a>
+                <button class="boton" type="submit">${esEditar ? 'Guardar cambios' : 'Guardar'}</button>
+                <c:choose>
+                    <c:when test="${esEditar}"><a class="boton-secundario" href="${ctx}/sismos/detalle?id=${sismoId}">Cancelar</a></c:when>
+                    <c:otherwise><a class="boton-secundario" href="${ctx}/sismos">Cancelar</a></c:otherwise>
+                </c:choose>
             </div>
         </form>
     </section>

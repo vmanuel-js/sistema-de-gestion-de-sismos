@@ -1,51 +1,78 @@
-# Sistema de Gestión de Sismos — Estado del Sprint 1 
+# Sistema de Gestión de Sismos — Sprint 1 (PA1)
 
-## HU completadas en este avance
+Grupo 6 · Desarrollo de Aplicaciones Empresariales Avanzado · ISIL 2026-20
 
-| HU | Descripción | Archivos |
-|----|-------------|----------|
-| HU-01 | Listar sismos | `servlet/SismoListarServlet.java`, `WEB-INF/views/sismos/lista.jsp` |
-| HU-02 | Registrar un nuevo sismo | `servlet/SismoNuevoServlet.java`, `WEB-INF/views/sismos/formulario.jsp` |
-| HU-05 | Ver el detalle de un sismo | `servlet/SismoDetalleServlet.java`, `WEB-INF/views/sismos/detalle.jsp` |
-| HU-08 | Gestionar el estado del evento | Lógica en `model/Sismo.java` (constantes + validación), aplicada en el registro |
+## Estado de las HU del sprint 1
 
-También se agregó `WEB-INF/views/error/404.jsp` (usado cuando se busca un sismo con un id que no existe) y `css/estilos.css` (estilo visual compartido por todas las pantallas del módulo).
+| HU | Descripción | Responsable | Estado |
+|----|-------------|-------------|--------|
+| HU-01 | Listar sismos | Víctor | ✅ |
+| HU-02 | Registrar un nuevo sismo | Nick | ✅ |
+| HU-03 | Validar campos obligatorios y código único | José | ✅ |
+| HU-04 | Validar magnitud, profundidad, coordenadas y fecha | Cristian | ✅ (dentro de `SismoValidador`, revisar) |
+| HU-05 | Ver el detalle de un sismo | José | ✅ |
+| HU-06 | Editar un sismo | Nick | ⏳ Pendiente |
+| HU-07 | Eliminar un sismo con confirmación | Víctor | ⏳ Pendiente |
+| HU-08 | Gestionar el estado del evento | Cristian | ⏳ Falta el selector en Editar (va con HU-06) |
 
-## Cómo está armado (por si necesitan tocar algo)
+## Estructura
 
-- **Modelo:** `model/Sismo.java`. Usa un solo campo `LocalDateTime fechaHora` (no fecha y hora separadas). El estado se guarda como texto legible: `"Registrado"`, `"En evaluacion"`, `"En seguimiento"`, `"Cerrado"` — están como constantes públicas (`Sismo.ESTADO_REGISTRADO`, etc.) y hay un método `Sismo.esEstadoValido(String)` ya listo para validar cualquier valor que llegue de un formulario.
-- **Repositorio:** `repository/SismoRepository.java`. En memoria (`CopyOnWriteArrayList`), con 5 sismos de ejemplo cargados al iniciar. `listar()` ya devuelve los sismos ordenados por fecha descendente.
-- **Listener:** `listener/AplicacionListener.java` crea el repositorio compartido en el `ServletContext` bajo la clave `AplicacionListener.REPOSITORIO_SISMOS`. **Todos los servlets del módulo (incluidos los de Editar y Eliminar que faltan) deben tomar el repositorio de ahí**, no crear uno nuevo.
-- **Validaciones (HU-03/HU-04):** están dentro de `SismoNuevoServlet.doPost()`, acumulando todos los errores en una lista antes de responder (para mostrarlos juntos en el formulario, como pide el prototipo). Si ya tienen una clase de validación aparte, avísenme y muevo esa lógica ahí para no duplicar código cuando hagan Editar.
+```
+src/main/java/com/grupo6/sistema/
+├── model/        Entidades (JavaBeans): Sismo, Departamento, Provincia, Distrito,
+│                 EstacionMonitoreo, ReporteAfectacion, SeguimientoSismo
+├── repository/   Un repositorio CRUD en memoria por entidad
+├── validacion/   SismoFormulario (valores del formulario) y SismoValidador (reglas)
+├── listener/     AplicacionListener: crea los repositorios y carga los datos de ejemplo
+└── servlet/      Controladores del CRUD de sismos
+src/main/webapp/WEB-INF/views/
+├── sismos/       lista.jsp, formulario.jsp (Nuevo y Editar), detalle.jsp
+└── error/        404.jsp
+```
 
-## Pendiente de integración con el resto del equipo
+## Reglas para no romper el código de los demás
 
-Estos puntos son importantes para que sus HU no rompan las mías (o viceversa):
+- **Repositorios:** todos los servlets los toman del `ServletContext` con las constantes de
+  `AplicacionListener` (`REPOSITORIO_SISMOS`, `REPOSITORIO_ESTACIONES`, etc.). Nunca crear uno nuevo.
+- **Datos de ejemplo:** se cargan en `AplicacionListener`, no en los repositorios.
+- **Estados:** usar las constantes de `Sismo` (`ESTADO_REGISTRADO`, `ESTADOS_VALIDOS`, etc.), nunca escribir los textos a mano.
+- **Validaciones:** usar siempre `SismoValidador`; no repetir validaciones dentro de los servlets.
 
-1. **Departamento / Provincia / Distrito (HU-09 y HU-21 — Jose/quien las tenga):** por ahora son campos de texto libre (`<input type="text">`) en el formulario, sin catálogo ni cascada. Cuando esté listo el repositorio de ubicaciones, solo hay que:
-   - Cambiar esos 3 `<input>` en `formulario.jsp` por `<select>`.
-   - En `SismoNuevoServlet`, validar contra el catálogo en vez de solo comprobar que no esté vacío.
-   - El modelo `Sismo` no cambia: sigue guardando `departamento`, `provincia`, `distritoReferencia` como `String`.
+## Guía para HU-06 Editar (Nick)
 
-2. **Estación (HU-10/HU-11 — quien las tenga):** el modelo `Sismo` **todavía no tiene** un campo para relacionar la estación. Si van a agregarlo, avísenme el nombre exacto del campo/getter que van a usar para no chocar cuando yo toque `Sismo.java` de nuevo (por ejemplo, para Eliminar).
+`formulario.jsp` ya sirve para Editar. Solo falta crear `SismoEditarServlet` en `/sismos/editar`:
 
-3. **Editar (HU-06 — Nick):** el `<select>` de estado con las 4 opciones fijas debe usar `Sismo.ESTADOS_VALIDOS` (el arreglo ya definido en el modelo) en vez de escribir los strings de nuevo, para evitar que se desincronicen los valores válidos entre pantallas.
+- **GET `/sismos/editar?id=X`**: buscar el sismo (si no existe, 404 como en `SismoDetalleServlet`) y enviar a la JSP:
+  - `modo` = `"editar"` · `sismoId` = el id · `formulario` = `SismoFormulario.desdeSismo(sismo)`
+  - `errores` = `Map.of()` · `estaciones`, `intensidades` y `estados` (igual que en `SismoNuevoServlet`)
+- **POST `/sismos/editar`** (el id llega en el campo oculto `id`):
+  1. `request.setCharacterEncoding("UTF-8")` y `SismoFormulario.desdeRequest(request)`.
+  2. `validador.validar(formulario, sismoActual)`. Pasar el sismo actual hace que el código único ignore al propio sismo y que se valide el estado.
+  3. Si hay errores, volver a la JSP con `formulario` y `errores`.
+  4. Si no, `formulario.copiarEn(sismoActual)`, `repositorio.actualizar(sismoActual)` y redirigir a
+     `/sismos/detalle?id=X&actualizado=1` (el detalle ya muestra "Sismo actualizado correctamente").
 
-4. **Eliminar (HU-07 — Victor, pendiente):** falta por hacer. Va a necesitar el mismo repositorio (`SismoRepository.eliminar(id)` ya existe y funciona) y revisar la regla de "no se puede eliminar si está En seguimiento".
+## Guía para HU-07 Eliminar (Víctor)
 
-5. **Nombres de URL usados hasta ahora** (para que Nick/Jose no inventen otros):
-   - `GET /sismos` → listar
-   - `GET /sismos/nuevo` y `POST /sismos/nuevo` → registrar
-   - `GET /sismos/detalle?id=X` → ver detalle
-   - `GET /sismos/editar?id=X` y `POST /sismos/editar` → **(pendiente, para Nick — HU-06)**
-   - `GET /sismos/eliminar?id=X` y `POST /sismos/eliminar` → **(pendiente, para Victor — HU-07)**
+- **GET `/sismos/eliminar?id=X`**: mostrar `eliminar.jsp` con el código, fecha, magnitud, referencia y estado, la advertencia y los botones Confirmar (formulario POST) y Cancelar.
+- **POST `/sismos/eliminar`**: si el estado es `Sismo.ESTADO_EN_SEGUIMIENTO`, no eliminar y volver a mostrar la confirmación con el motivo. Si no, `repositorio.eliminar(id)` y redirigir a `/sismos?eliminado=true` (la lista ya muestra el mensaje).
+- Para probar el bloqueo: `SIS-001` está En seguimiento en los datos de ejemplo.
 
-## Dependencias agregadas al `pom.xml`
+## Datos de ejemplo (AplicacionListener)
 
-Se agregaron 2 dependencias de JSTL (`jakarta.servlet.jsp.jstl-api` y `org.glassfish.web:jakarta.servlet.jsp.jstl`) porque sin ellas las JSP con `<c:...>` tiraban `JasperException` al no encontrar el TLD. Si a alguien más le sale ese mismo error al bajar la última versión del repo, es que le falta recargar Maven después del `pull`.
+- 5 sismos (SIS-001 a SIS-005) con estados distintos y su estación.
+- 5 departamentos con su provincia y distrito.
+- 6 estaciones; **TAC-02 está inactiva** para probar que no acepta nuevos registros.
+- 1 reporte de afectación y 1 seguimiento para SIS-001.
 
-## Cómo probarlo localmente
+## Cómo ejecutarlo
 
-1. `mvn clean package` (o el botón equivalente del IDE).
-2. Desplegar el WAR en Tomcat / reiniciar el servidor.
-3. Abrir `http://localhost:8080/<nombre-del-contexto>/sismos`.
+Requisitos: JDK 17 o superior, Maven y **Tomcat 10.1 u 11** (Jakarta EE 10).
+
+- **NetBeans:** Run con el servidor Tomcat configurado.
+- **IntelliJ IDEA Ultimate:** Run → Edit Configurations → Tomcat Server → Local → Deployment →
+  artifact `sistema-de-gestion-de-sismos:war exploded`, con Application context `/sistema-de-gestion-de-sismos`.
+
+Abrir `http://localhost:8080/sistema-de-gestion-de-sismos/sismos`.
+
+Después de cada `git pull`, recargar Maven (NetBeans: Reload POM · IntelliJ: Reload All Maven Projects).

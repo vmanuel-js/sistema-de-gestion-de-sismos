@@ -1,0 +1,10 @@
+# Normaliza los saltos de línea entre Windows (NetBeans) y Mac (IntelliJ)
+* text=auto
+*.java text eol=lf
+*.jsp  text eol=lf
+*.xml  text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+*.md   text eol=lf
+*.png  binary
+*.jpg  binary
