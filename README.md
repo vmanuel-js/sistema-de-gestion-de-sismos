@@ -2,6 +2,8 @@
 
 Grupo 6 · Desarrollo de Aplicaciones Empresariales Avanzado · ISIL 2026-20
 
+Primer módulo del Sistema de Gestión de Sismos del Perú: CRUD de eventos sísmicos con Servlets, JSP y el patrón MVC, con datos en memoria.
+
 ## Estado de las HU del sprint 1
 
 | HU | Descripción | Responsable | Estado |
@@ -9,11 +11,11 @@ Grupo 6 · Desarrollo de Aplicaciones Empresariales Avanzado · ISIL 2026-20
 | HU-01 | Listar sismos | Víctor | ✅ |
 | HU-02 | Registrar un nuevo sismo | Nick | ✅ |
 | HU-03 | Validar campos obligatorios y código único | José | ✅ |
-| HU-04 | Validar magnitud, profundidad, coordenadas y fecha | Cristian | ✅ (dentro de `SismoValidador`, revisar) |
+| HU-04 | Validar magnitud, profundidad, coordenadas y fecha | Cristian | ✅ |
 | HU-05 | Ver el detalle de un sismo | José | ✅ |
-| HU-06 | Editar un sismo | José | ✅ |
-| HU-07 | Eliminar un sismo con confirmación | José | ✅ |
-| HU-08 | Gestionar el estado del evento | Cristian | ✅ (estado automático al registrar y selector en Editar) |
+| HU-06 | Editar un sismo | Nick | ✅ |
+| HU-07 | Eliminar un sismo con confirmación | Víctor | ✅ |
+| HU-08 | Gestionar el estado del evento | Cristian | ✅ |
 
 ## Estructura
 
@@ -26,7 +28,7 @@ src/main/java/com/grupo6/sistema/
 ├── listener/     AplicacionListener: crea los repositorios y carga los datos de ejemplo
 └── servlet/      Controladores del CRUD de sismos
 src/main/webapp/WEB-INF/views/
-├── sismos/       lista.jsp, formulario.jsp (Nuevo y Editar), detalle.jsp
+├── sismos/       lista.jsp, formulario.jsp (Nuevo y Editar), detalle.jsp, eliminar.jsp
 └── error/        404.jsp
 ```
 
@@ -37,6 +39,7 @@ src/main/webapp/WEB-INF/views/
 - **Datos de ejemplo:** se cargan en `AplicacionListener`, no en los repositorios.
 - **Estados:** usar las constantes de `Sismo` (`ESTADO_REGISTRADO`, `ESTADOS_VALIDOS`, etc.), nunca escribir los textos a mano.
 - **Validaciones:** usar siempre `SismoValidador`; no repetir validaciones dentro de los servlets.
+- **Ramas:** crear una rama por HU desde `main` actualizado y unirla con un Pull Request.
 
 ## Rutas del CRUD
 
@@ -63,6 +66,8 @@ Todas las operaciones que modifican datos usan POST y redirigen al terminar (Pos
 Requisitos: JDK 17 o superior, Maven y **Tomcat 10.1 u 11** (Jakarta EE 10).
 
 - **NetBeans:** Run con el servidor Tomcat configurado.
+- **IntelliJ IDEA con Smart Tomcat:** Run → Edit Configurations → + → Smart Tomcat → elegir la carpeta de Tomcat,
+  *Use classpath of module* = `sistema-de-gestion-de-sismos` y *Context path* = `/sistema-de-gestion-de-sismos`.
 - **IntelliJ IDEA Ultimate:** Run → Edit Configurations → Tomcat Server → Local → Deployment →
   artifact `sistema-de-gestion-de-sismos:war exploded`, con Application context `/sistema-de-gestion-de-sismos`.
 
