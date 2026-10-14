@@ -35,6 +35,7 @@ public class SismoListarServlet extends HttpServlet {
         request.setAttribute("pagina", pagina);
         request.setAttribute("sismos", pagina.getRegistros());
         request.setAttribute("departamentos", repositorioDepartamentos().listar());
+        request.setAttribute("estados", Sismo.ESTADOS_VALIDOS);
 
         request.getRequestDispatcher("/WEB-INF/views/sismos/lista.jsp")
                 .forward(request, response);

@@ -55,9 +55,9 @@
                 <span>Estado</span>
                 <select name="estado">
                     <option value="">Todos</option>
-                    <option value="Registrado" ${busqueda.estado eq 'Registrado' ? 'selected' : ''}>Registrado</option>
-                    <option value="En evaluación" ${busqueda.estado eq 'En evaluación' ? 'selected' : ''}>En evaluación</option>
-                    <option value="En seguimiento" ${busqueda.estado eq 'En seguimiento' ? 'selected' : ''}>En seguimiento</option>
+                    <c:forEach items="${estados}" var="est">
+                        <option value="${est}" ${busqueda.estado eq est ? 'selected' : ''}>${est}</option>
+                    </c:forEach>
                 </select>
             </label>
             <label>
