@@ -35,13 +35,13 @@
                 <thead>
                 <tr>
                     <th>Código</th><th>Nombre</th><th>Ubicación</th>
-                    <th>Instalación</th><th>Estado</th><th>Acciones</th>
+                    <th>Instalación</th><th>Sismos</th><th>Estado</th><th>Acciones</th>
                 </tr>
                 </thead>
                 <tbody>
                 <c:choose>
                     <c:when test="${empty estaciones}">
-                        <tr><td colspan="6" class="vacio">No hay estaciones registradas.</td></tr>
+                        <tr><td colspan="7" class="vacio">No hay estaciones registradas.</td></tr>
                     </c:when>
                     <c:otherwise>
                         <c:forEach items="${estaciones}" var="est">
@@ -50,6 +50,7 @@
                                 <td><c:out value="${est.nombre}"/></td>
                                 <td><c:out value="${est.distrito.nombre}"/>, <c:out value="${est.distrito.provincia.nombre}"/></td>
                                 <td><c:out value="${est.fechaInstalacionTexto}"/></td>
+                                <td><c:out value="${empty sismosPorEstacion[est.id] ? 0 : sismosPorEstacion[est.id]}"/></td>
                                 <td>
                                     <span class="badge ${est.activa ? 'badge-registrado' : 'badge-cerrado'}">
                                         <c:out value="${est.estado}"/>

@@ -39,7 +39,7 @@
         <form method="get" action="${ctx}/sismos" class="filtros">
             <label>
                 <span>Código o referencia geográfica</span>
-                <input name="buscar" type="search" maxlength="150" placeholder="Ej. SIS-2026-001, Chivay o Caylloma"
+                <input name="buscar" type="search" maxlength="150" placeholder="Ej. SIS-001, Chivay o Caylloma"
                        value="<c:out value='${busqueda.terminoTexto}'/>">
             </label>
             <label>
@@ -55,9 +55,9 @@
                 <span>Estado</span>
                 <select name="estado">
                     <option value="">Todos</option>
-                    <option value="Registrado" ${busqueda.estado eq 'Registrado' ? 'selected' : ''}>Registrado</option>
-                    <option value="En evaluación" ${busqueda.estado eq 'En evaluación' ? 'selected' : ''}>En evaluación</option>
-                    <option value="En seguimiento" ${busqueda.estado eq 'En seguimiento' ? 'selected' : ''}>En seguimiento</option>
+                    <c:forEach items="${estados}" var="est">
+                        <option value="${est}" ${busqueda.estado eq est ? 'selected' : ''}>${est}</option>
+                    </c:forEach>
                 </select>
             </label>
             <label>

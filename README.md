@@ -29,8 +29,8 @@ Para volver a los datos de ejemplo (por ejemplo, antes de grabar el video), ejec
 | HU-09 | Gestionar ubicaciones geográficas | José | ✅ |
 | HU-21 | Seleccionar la ubicación en cascada | Víctor | ✅ |
 | HU-10 | Gestionar estaciones de monitoreo | Víctor | ✅ |
-| HU-11 | Asociar un sismo a la estación que lo registró | Cristian | ⏳ |
-| HU-30 | Filtrar sismos por estado del evento | Cristian | ⏳ |
+| HU-11 | Asociar un sismo a la estación que lo registró | Cristian | ✅ |
+| HU-30 | Filtrar sismos por estado del evento | Cristian | ✅ |
 | HU-31 | Buscar un sismo por código o referencia geográfica | Nick | ✅ |
 
 Base del proyecto (José): migración a JPA y MySQL, script SQL, entidades con relaciones y repositorios JPA.
@@ -78,13 +78,6 @@ database/   01_schema.sql y 02_datos_iniciales.sql
 - **Tablas nuevas o columnas nuevas:** agregarlas al script SQL y a la entidad con el mismo nombre.
 - **Estados:** usar las constantes de `Sismo` y `EstacionMonitoreo`, nunca escribir los textos a mano.
 - **Ramas:** una rama por HU creada desde `main` actualizado y unirla con un Pull Request.
-
-## Guía rápida para las HU pendientes
-
-- **HU-11 Sismo y estación (Cristian):** la relación `Sismo N ── 1 Estación` y la regla de estación inactiva
-  ya están en la base (`SismoValidador`). Queda completar los criterios de la HU en las pantallas.
-- **HU-30 Estado (Cristian):** agregar el filtro en `SismoBusqueda`, su condición JPQL en
-  `SismoRepository.agregarCondiciones` y el campo en el formulario de filtros de `sismos/lista.jsp`.
 
 ## Rutas
 

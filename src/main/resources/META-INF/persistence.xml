@@ -15,7 +15,6 @@
     <class>com.grupo6.sistema.model.Sismo</class>
     <class>com.grupo6.sistema.model.ReporteAfectacion</class>
     <class>com.grupo6.sistema.model.SeguimientoSismo</class>
-    <class>com.grupo6.sistema.validacion.EstacionFormulario</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <!-- Sin caché compartida: cada consulta lee los datos actuales de MySQL
              (también los cambios hechos directamente en DBeaver). -->
