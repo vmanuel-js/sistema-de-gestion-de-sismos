@@ -4,7 +4,9 @@ import com.grupo6.sistema.model.Distrito;
 import com.grupo6.sistema.model.EstacionMonitoreo;
 import jakarta.persistence.EntityManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /** Repositorio JPA de estaciones de monitoreo. */
@@ -35,6 +37,18 @@ public class EstacionMonitoreoRepository extends RepositorioJpa<EstacionMonitore
 
     public Optional<EstacionMonitoreo> buscarPorCodigo(String codigo) {
         return buscarUno("SELECT e FROM EstacionMonitoreo e WHERE e.codigo = :valor", codigo);
+    }
+
+    /** HU-11: cantidad de sismos registrados por cada estación (id de estación -> total). */
+    public Map<Long, Long> contarSismosPorEstacion() {
+        return consultar(em -> {
+            Map<Long, Long> totales = new HashMap<>();
+            em.createQuery("SELECT s.estacion.id, COUNT(s) FROM Sismo s WHERE s.estacion IS NOT NULL GROUP BY s.estacion.id",
+                            Object[].class)
+                    .getResultList()
+                    .forEach(fila -> totales.put((Long) fila[0], (Long) fila[1]));
+            return totales;
+        }, "No se pudo contar los sismos por estación.");
     }
 
     public long contarSismos(long estacionId) {

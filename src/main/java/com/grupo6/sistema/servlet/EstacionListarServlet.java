@@ -25,6 +25,7 @@ public class EstacionListarServlet extends HttpServlet {
         List<EstacionMonitoreo> estaciones = repositorio().listar();
         request.setAttribute("estaciones", estaciones);
         request.setAttribute("totalEstaciones", estaciones.size());
+        request.setAttribute("sismosPorEstacion", repositorio().contarSismosPorEstacion());
 
         request.getRequestDispatcher("/WEB-INF/views/estaciones/lista.jsp")
                 .forward(request, response);

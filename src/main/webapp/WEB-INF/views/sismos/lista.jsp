@@ -39,7 +39,7 @@
         <form method="get" action="${ctx}/sismos" class="filtros">
             <label>
                 <span>Código o referencia geográfica</span>
-                <input name="buscar" type="search" maxlength="150" placeholder="Ej. SIS-2026-001, Chivay o Caylloma"
+                <input name="buscar" type="search" maxlength="150" placeholder="Ej. SIS-001, Chivay o Caylloma"
                        value="<c:out value='${busqueda.terminoTexto}'/>">
             </label>
             <label>
